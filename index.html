@@ -1,0 +1,710 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Signal Mastermind Pro - Trading Signals</title>
+    <style>
+        /* Base Styles */
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #1e1e2e;
+            color: #ffffff;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* Header Styles */
+        .warning-banner {
+            background-color: #ffcc00;
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            text-align: center;
+            font-weight: bold;
+            color: #000000;
+        }
+
+        nav {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .nav-btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            background-color: #2d2d3a;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s;
+            color: white;
+        }
+
+        .nav-btn.active {
+            background-color: #4CAF50;
+            color: white;
+        }
+
+        .nav-btn:hover {
+            background-color: #3d3d4a;
+        }
+
+        .telegram-btn {
+            padding: 10px 20px;
+            background-color: #0088cc;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            font-weight: bold;
+            margin-left: auto;
+            transition: background-color 0.3s;
+        }
+
+        .telegram-btn:hover {
+            background-color: #006699;
+        }
+
+        /* Panel Styles */
+        .market-panel, .timeframe-panel, .signal-panel, .results-panel, .money-management-panel {
+            background-color: #2d2d3a;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+        }
+
+        h2 {
+            margin-top: 0;
+            color: #4CAF50;
+        }
+
+        /* Button Grids */
+        .market-buttons, .timeframe-buttons, .signal-count {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .timeframe-btn, .count-btn, .market-btn {
+            padding: 10px;
+            border: 1px solid #444;
+            border-radius: 5px;
+            background-color: #3d3d4a;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-align: center;
+            color: white;
+        }
+
+        .timeframe-btn.active, .count-btn.active, .market-btn.active {
+            background-color: #4CAF50;
+            color: white;
+            border-color: #4CAF50;
+            transform: scale(1.05);
+        }
+
+        .generate-btn, .copy-btn, .save-btn {
+            padding: 12px 24px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            margin-top: 15px;
+            transition: background-color 0.3s;
+        }
+
+        .generate-btn:hover, .copy-btn:hover, .save-btn:hover {
+            background-color: #3e8e41;
+        }
+
+        /* Results Display */
+        .signal-results {
+            margin-top: 20px;
+            padding: 15px;
+            border: 1px solid #444;
+            border-radius: 5px;
+            min-height: 200px;
+            background-color: #3d3d4a;
+        }
+
+        .signal-item {
+            padding: 10px;
+            margin-bottom: 10px;
+            border-radius: 5px;
+            display: flex;
+            justify-content: space-between;
+            background-color: #2d2d3a;
+        }
+
+        .buy-signal {
+            border-left: 4px solid #4CAF50;
+        }
+
+        .sell-signal {
+            border-left: 4px solid #f44336;
+        }
+
+        .signal-time {
+            font-weight: bold;
+            color: #4CAF50;
+        }
+
+        .signal-direction {
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+
+        .buy-direction {
+            color: #4CAF50;
+        }
+
+        .sell-direction {
+            color: #f44336;
+        }
+
+        /* Money Management */
+        .money-management-panel {
+            display: none;
+        }
+
+        .money-management-panel.show {
+            display: block;
+        }
+
+        .capital-input, .risk-input {
+            margin-bottom: 15px;
+        }
+
+        .capital-input label, .risk-input label {
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        .capital-input input, .risk-input input {
+            padding: 8px;
+            border: 1px solid #444;
+            border-radius: 4px;
+            width: 100px;
+            background-color: #3d3d4a;
+            color: white;
+        }
+
+        .management-results {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #3d3d4a;
+            border-radius: 5px;
+        }
+
+        /* Loading Spinner */
+        .loading {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .spinner {
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top: 3px solid #4CAF50;
+            width: 20px;
+            height: 20px;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* API Status */
+        .api-status {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 10px;
+        }
+
+        .status-indicator {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background-color: #f44336;
+        }
+
+        .status-indicator.connected {
+            background-color: #4CAF50;
+        }
+
+        /* Footer */
+        footer {
+            text-align: center;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #444;
+            color: #777;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .market-buttons, .timeframe-buttons, .signal-count {
+                grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+            }
+            
+            nav {
+                flex-wrap: wrap;
+            }
+            
+            .telegram-btn {
+                margin-left: 0;
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header with Warning and Navigation -->
+        <header>
+            <div class="warning-banner">
+                <p>⚠️ Trading involves risk. Past performance doesn't guarantee future results. Only trade with money you can afford to lose.</p>
+            </div>
+            <nav>
+                <button id="liveSignalBtn" class="nav-btn active">Live Signals</button>
+                <button id="futureSignalBtn" class="nav-btn">Future Signals</button>
+                <button id="moneyManagementBtn" class="nav-btn">Money Management</button>
+                <a href="https://t.me/signalmastermindpro" class="telegram-btn" target="_blank">Join Our Telegram</a>
+            </nav>
+            <div class="api-status">
+                <div id="statusIndicator" class="status-indicator"></div>
+                <span id="statusText">Connecting to API...</span>
+            </div>
+        </header>
+
+        <!-- Main Content Area -->
+        <main>
+            <!-- Market Selection Panel -->
+            <div class="market-panel">
+                <h2>Select Market</h2>
+                <div class="market-buttons">
+                    <!-- Markets will be loaded from API -->
+                </div>
+            </div>
+
+            <!-- Timeframe Selection -->
+            <div class="timeframe-panel">
+                <h2>Timeframe</h2>
+                <div class="timeframe-buttons">
+                    <button class="timeframe-btn active" data-time="1">1 Min</button>
+                    <button class="timeframe-btn" data-time="2">2 Min</button>
+                    <button class="timeframe-btn" data-time="3">3 Min</button>
+                    <button class="timeframe-btn" data-time="5">5 Min</button>
+                    <button class="timeframe-btn" data-time="15">15 Min</button>
+                    <button class="timeframe-btn" data-time="30">30 Min</button>
+                    <button class="timeframe-btn" data-time="60">1 Hour</button>
+                </div>
+            </div>
+
+            <!-- Signal Generation Panel -->
+            <div class="signal-panel">
+                <h2>Generate Signals</h2>
+                <div class="signal-count">
+                    <button class="count-btn" data-count="10">10 Signals</button>
+                    <button class="count-btn" data-count="20">20 Signals</button>
+                    <button class="count-btn" data-count="30">30 Signals</button>
+                    <button class="count-btn" data-count="40">40 Signals</button>
+                    <button class="count-btn" data-count="50">50 Signals</button>
+                </div>
+                <button id="generateSignalsBtn" class="generate-btn">Generate Signals</button>
+            </div>
+
+            <!-- Results Display -->
+            <div class="results-panel">
+                <h2>Signals Output</h2>
+                <div class="signal-results">
+                    <p>Select a market and click "Generate Signals" to get started</p>
+                </div>
+                <button id="copySignalsBtn" class="copy-btn">Copy Signals</button>
+                <button id="saveSignalsBtn" class="save-btn">Save to History</button>
+            </div>
+
+            <!-- Money Management Panel (Initially Hidden) -->
+            <div class="money-management-panel hidden">
+                <h2>Money Management</h2>
+                <div class="capital-input">
+                    <label for="startingCapital">Starting Capital ($):</label>
+                    <input type="number" id="startingCapital" min="5" max="2000" value="100">
+                </div>
+                <div class="risk-input">
+                    <label for="riskPercentage">Risk per Trade (%):</label>
+                    <input type="number" id="riskPercentage" min="1" max="10" value="2">
+                </div>
+                <div class="management-results">
+                    <!-- Calculated results will appear here -->
+                </div>
+            </div>
+        </main>
+
+        <!-- Footer -->
+        <footer>
+            <p>© 2023 Signal Mastermind Pro. All rights reserved.</p>
+            <p>API Status: <span id="apiStatusText">Connecting...</span> | Last updated: <span id="lastUpdated"></span></p>
+        </footer>
+    </div>
+
+    <script>
+        // Market Data API Connection
+        let apiConnected = false;
+        let lastUpdateTime = null;
+        let selectedMarket = null;
+        let selectedTimeframe = 1;
+        let signalCount = 10;
+        let markets = [];
+
+        // Initialize the application
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialize API connection
+            connectToAPI();
+            
+            // Set up event listeners
+            setupEventListeners();
+            
+            // Set default active buttons
+            document.querySelector('.timeframe-btn[data-time="1"]').classList.add('active');
+            document.querySelector('.count-btn[data-count="10"]').classList.add('active');
+        });
+
+        // Connect to Market Data API
+        function connectToAPI() {
+            const statusIndicator = document.getElementById('statusIndicator');
+            const statusText = document.getElementById('statusText');
+            const apiStatusText = document.getElementById('apiStatusText');
+            
+            // Simulate API connection (in real implementation, this would connect to your actual API)
+            statusText.textContent = "Connecting to API...";
+            apiStatusText.textContent = "Connecting...";
+            
+            // This timeout simulates API connection time
+            setTimeout(() => {
+                // Simulate successful connection
+                apiConnected = true;
+                statusIndicator.classList.add('connected');
+                statusText.textContent = "API Connected (Live Data)";
+                apiStatusText.textContent = "Connected (Live Data)";
+                lastUpdateTime = new Date();
+                updateLastUpdated();
+                
+                // Load markets from API (simulated)
+                loadMarkets();
+                
+                // Start live updates
+                startLiveUpdates();
+            }, 2000);
+        }
+
+        // Load markets from API
+        function loadMarkets() {
+            // Simulated API response
+            const simulatedMarkets = [
+                { code: "USDJPY", name: "USD/JPY" },
+                { code: "EURUSD", name: "EUR/USD" },
+                { code: "GBPUSD", name: "GBP/USD" },
+                { code: "AUDUSD", name: "AUD/USD" },
+                { code: "USDCAD", name: "USD/CAD" },
+                { code: "USDCHF", name: "USD/CHF" },
+                { code: "NZDUSD", name: "NZD/USD" },
+                { code: "EURJPY", name: "EUR/JPY" },
+                { code: "GBPJPY", name: "GBP/JPY" },
+                { code: "EURGBP", name: "EUR/GBP" },
+                { code: "XAUUSD", name: "Gold (XAU/USD)" },
+                { code: "XAGUSD", name: "Silver (XAG/USD)" },
+                { code: "USOIL", name: "Crude Oil" },
+                { code: "BTCUSD", name: "Bitcoin (BTC/USD)" },
+                { code: "ETHUSD", name: "Ethereum (ETH/USD)" }
+            ];
+            
+            markets = simulatedMarkets;
+            populateMarkets();
+        }
+
+        // Populate market buttons
+        function populateMarkets() {
+            const marketButtonsContainer = document.querySelector('.market-buttons');
+            marketButtonsContainer.innerHTML = '';
+            
+            markets.forEach(market => {
+                const button = document.createElement('button');
+                button.className = 'market-btn';
+                button.dataset.market = market.code;
+                button.textContent = market.name;
+                
+                button.addEventListener('click', function() {
+                    // Remove active class from all market buttons
+                    document.querySelectorAll('.market-btn').forEach(btn => {
+                        btn.classList.remove('active');
+                    });
+                    
+                    // Add active class to clicked button
+                    this.classList.add('active');
+                    selectedMarket = market.code;
+                });
+                
+                marketButtonsContainer.appendChild(button);
+            });
+        }
+
+        // Set up event listeners
+        function setupEventListeners() {
+            // Timeframe buttons
+            document.querySelectorAll('.timeframe-btn').forEach(button => {
+                button.addEventListener('click', function() {
+                    document.querySelectorAll('.timeframe-btn').forEach(btn => {
+                        btn.classList.remove('active');
+                    });
+                    this.classList.add('active');
+                    selectedTimeframe = parseInt(this.dataset.time);
+                });
+            });
+            
+            // Signal count buttons
+            document.querySelectorAll('.count-btn').forEach(button => {
+                button.addEventListener('click', function() {
+                    document.querySelectorAll('.count-btn').forEach(btn => {
+                        btn.classList.remove('active');
+                    });
+                    this.classList.add('active');
+                    signalCount = parseInt(this.dataset.count);
+                });
+            });
+            
+            // Navigation buttons
+            document.getElementById('liveSignalBtn').addEventListener('click', function() {
+                document.querySelectorAll('.nav-btn').forEach(btn => {
+                    btn.classList.remove('active');
+                });
+                this.classList.add('active');
+                document.querySelector('.money-management-panel').classList.remove('show');
+            });
+            
+            document.getElementById('futureSignalBtn').addEventListener('click', function() {
+                document.querySelectorAll('.nav-btn').forEach(btn => {
+                    btn.classList.remove('active');
+                });
+                this.classList.add('active');
+                document.querySelector('.money-management-panel').classList.remove('show');
+            });
+            
+            document.getElementById('moneyManagementBtn').addEventListener('click', function() {
+                document.querySelectorAll('.nav-btn').forEach(btn => {
+                    btn.classList.remove('active');
+                });
+                this.classList.add('active');
+                document.querySelector('.money-management-panel').classList.add('show');
+                calculateMoneyManagement();
+            });
+            
+            // Generate signals button
+            document.getElementById('generateSignalsBtn').addEventListener('click', generateSignals);
+            
+            // Copy signals button
+            document.getElementById('copySignalsBtn').addEventListener('click', copySignals);
+            
+            // Save signals button
+            document.getElementById('saveSignalsBtn').addEventListener('click', saveSignals);
+            
+            // Money management inputs
+            document.getElementById('startingCapital').addEventListener('input', calculateMoneyManagement);
+            document.getElementById('riskPercentage').addEventListener('input', calculateMoneyManagement);
+        }
+
+        // Generate trading signals
+        function generateSignals() {
+            if (!selectedMarket) {
+                alert("Please select a market first");
+                return;
+            }
+            
+            if (!apiConnected) {
+                alert("API is not connected yet. Please wait...");
+                return;
+            }
+            
+            const resultsContainer = document.querySelector('.signal-results');
+            resultsContainer.innerHTML = '<p class="loading">Generating signals... <span class="spinner"></span></p>';
+            
+            // Simulate API call to get signals (in real implementation, this would call your actual API)
+            setTimeout(() => {
+                const signals = generateMockSignals(signalCount, selectedTimeframe);
+                displaySignals(signals);
+            }, 1000);
+        }
+
+        // Generate mock signals for demonstration
+        function generateMockSignals(count, timeframe) {
+            const signals = [];
+            const now = new Date();
+            
+            for (let i = 0; i < count; i++) {
+                // Calculate signal time (future time for future signals)
+                const minutesToAdd = (i + 1) * timeframe;
+                const signalTime = new Date(now.getTime() + minutesToAdd * 60000);
+                
+                // Randomly determine direction (BUY or SELL)
+                const direction = Math.random() > 0.5 ? "BUY" : "SELL";
+                
+                signals.push({
+                    market: selectedMarket,
+                    timeframe: timeframe,
+                    time: signalTime,
+                    direction: direction,
+                    confidence: Math.floor(Math.random() * 30) + 70 // 70-99% confidence
+                });
+            }
+            
+            return signals;
+        }
+
+        // Display signals in the results panel
+        function displaySignals(signals) {
+            const resultsContainer = document.querySelector('.signal-results');
+            resultsContainer.innerHTML = '';
+            
+            signals.forEach(signal => {
+                const signalElement = document.createElement('div');
+                signalElement.className = `signal-item ${signal.direction.toLowerCase()}-signal`;
+                
+                const timeElement = document.createElement('span');
+                timeElement.className = 'signal-time';
+                timeElement.textContent = formatDateTime(signal.time);
+                
+                const marketElement = document.createElement('span');
+                marketElement.className = 'signal-market';
+                marketElement.textContent = signal.market;
+                
+                const directionElement = document.createElement('span');
+                directionElement.className = `signal-direction ${signal.direction.toLowerCase()}-direction`;
+                directionElement.textContent = signal.direction;
+                
+                const confidenceElement = document.createElement('span');
+                confidenceElement.className = 'signal-confidence';
+                confidenceElement.textContent = `${signal.confidence}%`;
+                
+                signalElement.appendChild(timeElement);
+                signalElement.appendChild(marketElement);
+                signalElement.appendChild(directionElement);
+                signalElement.appendChild(confidenceElement);
+                
+                resultsContainer.appendChild(signalElement);
+            });
+        }
+
+        // Copy signals to clipboard
+        function copySignals() {
+            const signalElements = document.querySelectorAll('.signal-item');
+            if (signalElements.length === 0) {
+                alert("No signals to copy");
+                return;
+            }
+            
+            let signalsText = "Trading Signals:\n\n";
+            
+            signalElements.forEach(signal => {
+                const time = signal.querySelector('.signal-time').textContent;
+                const market = signal.querySelector('.signal-market').textContent;
+                const direction = signal.querySelector('.signal-direction').textContent;
+                const confidence = signal.querySelector('.signal-confidence').textContent;
+                
+                signalsText += `${time} - ${market} - ${direction} (${confidence})\n`;
+            });
+            
+            navigator.clipboard.writeText(signalsText).then(() => {
+                alert("Signals copied to clipboard!");
+            }).catch(err => {
+                console.error("Failed to copy signals: ", err);
+                alert("Failed to copy signals. Please try again.");
+            });
+        }
+
+        // Save signals to history (simulated)
+        function saveSignals() {
+            const signalElements = document.querySelectorAll('.signal-item');
+            if (signalElements.length === 0) {
+                alert("No signals to save");
+                return;
+            }
+            
+            alert("Signals saved to your history!");
+        }
+
+        // Calculate money management
+        function calculateMoneyManagement() {
+            const capital = parseFloat(document.getElementById('startingCapital').value) || 100;
+            const riskPercentage = parseFloat(document.getElementById('riskPercentage').value) || 2;
+            
+            const riskPerTrade = capital * (riskPercentage / 100);
+            const positionSize = riskPerTrade * 100; // Simplified calculation
+            
+            const resultsHTML = `
+                <div class="management-result">
+                    <h3>Money Management Plan</h3>
+                    <p><strong>Starting Capital:</strong> $${capital.toFixed(2)}</p>
+                    <p><strong>Risk per Trade (${riskPercentage}%):</strong> $${riskPerTrade.toFixed(2)}</p>
+                    <p><strong>Suggested Position Size:</strong> $${positionSize.toFixed(2)}</p>
+                    <p><strong>Max Loss Before Stopping:</strong> 3 consecutive losses ($${(riskPerTrade * 3).toFixed(2)})</p>
+                    <p><strong>Profit Target (5:1 ratio):</strong> $${(riskPerTrade * 5).toFixed(2)} per trade</p>
+                </div>
+            `;
+            
+            document.querySelector('.management-results').innerHTML = resultsHTML;
+        }
+
+        // Format date and time
+        function formatDateTime(date) {
+            const options = { 
+                year: 'numeric', 
+                month: 'short', 
+                day: 'numeric', 
+                hour: '2-digit', 
+                minute: '2-digit',
+                hour12: true
+            };
+            return date.toLocaleString('en-US', options);
+        }
+
+        // Update last updated time
+        function updateLastUpdated() {
+            if (lastUpdateTime) {
+                document.getElementById('lastUpdated').textContent = formatDateTime(lastUpdateTime);
+            }
+        }
+
+        // Start live updates from API
+        function startLiveUpdates() {
+            // In a real implementation, this would connect to WebSocket or poll API for updates
+            setInterval(() => {
+                if (apiConnected) {
+                    lastUpdateTime = new Date();
+                    updateLastUpdated();
+                    
+                    // Check for new signals if in live mode
+                    if (document.getElementById('liveSignalBtn').classList.contains('active')) {
+                        // You could automatically update live signals here
+                    }
+                }
+            }, 60000); // Update every minute
+        }
+    </script>
+</body>
+</html>
